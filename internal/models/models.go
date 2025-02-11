@@ -15,6 +15,10 @@ type Merch struct {
 	Price int    `gorm:"not null"`
 }
 
+func (Merch) TableName() string {
+	return "merch"
+}
+
 // Покупки
 type Purchase struct {
 	ID      uint `gorm:"primaryKey"`

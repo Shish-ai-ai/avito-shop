@@ -16,8 +16,10 @@ func main() {
 	}
 
 	authService := services.NewAuthService(database.DB)
+	infoService := services.NewInfoService(database.DB)
+	purchaseService := services.NewPurchaseService(database.DB)
 
-	router := routes.SetupRouter(authService)
+	router := routes.SetupRouter(authService, infoService, purchaseService)
 
 	if err := router.Run(":8080"); err != nil {
 		log.Fatal("failed to start server: ", err)
