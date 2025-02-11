@@ -26,7 +26,6 @@ func InitDB() error {
 		return err
 	}
 
-	// Авто-миграция таблиц
 	err = db.AutoMigrate(&models.User{}, &models.Merch{}, &models.Purchase{}, &models.Operation{})
 	if err != nil {
 		return err

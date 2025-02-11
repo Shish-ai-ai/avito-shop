@@ -1,11 +1,15 @@
 FROM golang:1.22
 
-WORKDIR ${GOPATH}/avito-shop/
-COPY . ${GOPATH}/avito-shop/
+WORKDIR /app
 
-RUN go build -o /build ./internal/cmd \
-    && go clean -cache -modcache
+# Копируем исходный код
+COPY . .
 
+# Собираем приложение
+RUN go build -o avito-shop ./cmd/main.go
+
+# Открываем порт
 EXPOSE 8080
 
-CMD ["/build"]
+# Запускаем приложение
+CMD ["./avito-shop"]

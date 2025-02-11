@@ -2,19 +2,24 @@ package main
 
 import (
 	"avito-shop/internal/database"
-	"fmt"
+	"avito-shop/internal/routes"
+	"avito-shop/internal/services"
 	"github.com/joho/godotenv"
 	"log"
-	"net/http"
 )
 
 func main() {
-	godotenv.Load()
-	err := database.InitDB()
-	if err != nil {
-		log.Fatalf("Ошибка инициализации БД: %v", err)
+	godotenv.Load(".env")
+
+	if err := database.InitDB(); err != nil {
+		log.Fatal("failed to connect to the database: ", err)
 	}
 
-	fmt.Println("База данных успешно инициализирована!")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	authService := services.NewAuthService(database.DB)
+
+	router := routes.SetupRouter(authService)
+
+	if err := router.Run(":8080"); err != nil {
+		log.Fatal("failed to start server: ", err)
+	}
 }
