@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(authService *services.AuthService, infoService *services.InfoService, purchaseService *services.PurchaseService) *gin.Engine {
+func SetupRouter(authService *services.AuthService, infoService *services.InfoService, purchaseService *services.PurchaseService, coinService *services.CoinService) *gin.Engine {
 	router := gin.Default()
 
 	router.POST("/api/auth", transport.AuthHandler(authService))
@@ -18,6 +18,7 @@ func SetupRouter(authService *services.AuthService, infoService *services.InfoSe
 		protected.GET("/info", transport.InfoHandler(infoService))
 
 		protected.GET("/buy/:item", transport.BuyItemHandler(purchaseService))
+		protected.POST("/sendCoin", transport.SendCoinHandler(coinService))
 	}
 
 	return router

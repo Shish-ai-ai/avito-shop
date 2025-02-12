@@ -19,26 +19,53 @@ func (s *InfoService) GetUserInfo(userID uint) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	var purchases []models.Purchase
-	if err := s.DB.Where("user_id = ?", userID).Preload("Merch").Find(&purchases).Error; err != nil {
+	var purchases []struct {
+		ID      uint   `json:"id"`
+		MerchID uint   `json:"merch_id"`
+		Type    string `json:"type"`
+		Price   int    `json:"price"`
+		Amount  int    `json:"amount"`
+	}
+	if err := s.DB.Table("purchases").
+		Select("purchases.id, purchases.merch_id, merch.type, merch.price, purchases.amount").
+		Joins("JOIN merch ON purchases.merch_id = merch.id").
+		Where("purchases.user_id = ?", userID).
+		Scan(&purchases).Error; err != nil {
 		return nil, err
 	}
 
-	var sentOperations []models.Operation
-	if err := s.DB.Where("from_user = ?", userID).Find(&sentOperations).Error; err != nil {
-		return nil, err
+	var sentOperations []struct {
+		ID       uint `json:"id"`
+		FromUser uint `json:"from_user"`
+		ToUser   uint `json:"to_user"`
+		Amount   int  `json:"amount"`
 	}
-	var receivedOperations []models.Operation
-	if err := s.DB.Where("to_user = ?", userID).Find(&receivedOperations).Error; err != nil {
+	if err := s.DB.Table("operations").
+		Select("id, from_user, to_user, amount").
+		Where("from_user = ?", userID).
+		Scan(&sentOperations).Error; err != nil {
 		return nil, err
 	}
 
-	response := map[string]interface{}{
+	var receivedOperations []struct {
+		ID       uint `json:"id"`
+		FromUser uint `json:"from_user"`
+		ToUser   uint `json:"to_user"`
+		Amount   int  `json:"amount"`
+	}
+	if err := s.DB.Table("operations").
+		Select("id, from_user, to_user, amount").
+		Where("to_user = ?", userID).
+		Scan(&receivedOperations).Error; err != nil {
+		return nil, err
+	}
+
+	result := map[string]interface{}{
 		"balance":             user.Balance,
 		"purchases":           purchases,
 		"sent_operations":     sentOperations,
 		"received_operations": receivedOperations,
 	}
 
-	return response, nil
+	return result, nil
 }
